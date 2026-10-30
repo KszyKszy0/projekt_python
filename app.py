@@ -45,6 +45,17 @@ class DBConnector():
         output = res.fetchall()
         
         return output
+    
+    def update_book(self, id, title, author, publisher, category, publish_date, owner):
+        print((id, title, author, publisher, category, publish_date, owner))
+        self.cur.execute(f"UPDATE BOOKS SET title='{title}', author='{author}', publisher='{publisher}', category='{category}', publish_date='{publish_date}', owner='{owner}' WHERE id={id};")
+        # self.con.commit()
+
+    def get_edit_entry(self, id):
+        res = self.cur.execute(f"SELECT title, author, publisher, category, publish_date, users.name FROM Books JOIN Users ON Books.owner = Users.id WHERE Books.id={id};")
+
+        output = res.fetchall()
+        return output[0]
 
 class AddFrame(tk.Frame):
     def __init__(self, db):
@@ -56,7 +67,7 @@ class AddFrame(tk.Frame):
 
         self.name_dict = {}
         for i in range(len(name_list)):
-            self.name_dict[name_list[i]] = num_list[i] 
+            self.name_dict[name_list[i]] = num_list[i]
 
         # # 1st Section - insert / Sekcja pierwsza - dodawanie
         self.title = tk.Label(master=self, text="Formularz do wstawiania", width=20, bg="#555555", fg="#EEEEEE")
@@ -108,8 +119,16 @@ class AddFrame(tk.Frame):
         self.db.insert_book(title, author, publisher, category, publish, self.name_dict[owner])
 
 class EditFrame(tk.Toplevel):
-    def __init__(self, db):
+    def __init__(self, db, id):
         super().__init__(bg="#555555")
+
+        self.id = id
+        self.db = db
+        (num_list, name_list) = db.get_users()
+
+        self.name_dict = {}
+        for i in range(len(name_list)):
+            self.name_dict[name_list[i]] = num_list[i]
 
         # 1st Section - insert / Sekcja pierwsza - dodawanie
         self.edit_frame_title = tk.Label(master=self, text="Formularz do edycji", width=20, bg="#555555", fg="#EEEEEE")
@@ -142,11 +161,31 @@ class EditFrame(tk.Toplevel):
 
         self.owner_edit = tk.Label(master=self, text="Właściciel (domowy)", width=20, bg="#555555", fg="#EEEEEE")
         self.owner_edit.grid(row=6, column=0, padx=10, pady=10)
-        self.owner_edit_input = tk.Entry(master=self)
-        self.owner_edit_input.grid(row=6, column=1, padx=10, pady=10)
+        self.value_owner = StringVar(master=self)
+        self.value_owner.set(name_list[0])
+        self.owner_add_input = tk.OptionMenu(self, self.value_owner, *name_list)
+        self.owner_add_input.grid(row=6, column=1, padx=10, pady=10)
 
-        self.submit_button = tk.Button(master=self, text="Zatwierdź")
+        self.submit_button = tk.Button(master=self, text="Zatwierdź", command=self.update_entry)
         self.submit_button.grid(row=7, column=0, padx=10, pady=10, columnspan=2)
+        
+        entry = self.db.get_edit_entry(self.id)
+        self.title_edit_input.insert(0,entry[0])
+        self.author_edit_input.insert(0, entry[1])
+        self.publisher_edit_input.insert(0, entry[2])
+        self.category_edit_input.insert(0, entry[3])
+        self.publish_date_edit_input.insert(0, entry[4])
+        self.value_owner.set(entry[5])
+    
+    def update_entry(self):
+        title = self.title_edit_input.get()
+        author = self.author_edit_input.get()
+        publisher = self.publisher_edit_input.get()
+        category = self.category_edit_input.get()
+        publish = self.publish_date_edit_input.get()
+        owner = self.value_owner.get()
+
+        self.db.update_book(self.id, title, author, publisher, category, publish, owner)
 
 class ShowFrame(tk.Frame):
     def __init__(self, db):
@@ -244,7 +283,7 @@ class ShowFrame(tk.Frame):
             field_publish.grid(row=index, column=12,  pady=10, columnspan=3)
             field_owner = tk.Label(self, text=elem[7])
             field_owner.grid(row=index, column=15,  pady=10, columnspan=3)
-            edit_button = tk.Button(self, text="Edit", command=lambda: self.create_edit_tab(elem[0]))
+            edit_button = tk.Button(self, text="Edit", command=lambda book_id=elem[0]: self.create_edit_tab(book_id))
             edit_button.grid(row=index, column=17,  pady=10)
             self.elements_list.append((field_title, field_author, field_publisher, field_category, field_publish, field_owner, edit_button))
             index += 1
@@ -256,7 +295,7 @@ class ShowFrame(tk.Frame):
         self.refresh()
 
     def create_edit_tab(self, id):
-        self.current_edit_tab = EditFrame(self.db)
+        self.current_edit_tab = EditFrame(self.db, id)
 
 class ReportFrame(tk.Frame):
     def __init__(self, db):
