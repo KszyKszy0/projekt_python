@@ -119,11 +119,12 @@ class AddFrame(tk.Frame):
         self.db.insert_book(title, author, publisher, category, publish, self.name_dict[owner])
 
 class EditFrame(tk.Toplevel):
-    def __init__(self, db, id):
+    def __init__(self, db, id, refresh_fn):
         super().__init__(bg="#555555")
 
         self.id = id
         self.db = db
+        self.refresh_fn = refresh_fn
         (num_list, name_list) = db.get_users()
 
         self.name_dict = {}
@@ -185,7 +186,8 @@ class EditFrame(tk.Toplevel):
         publish = self.publish_date_edit_input.get()
         owner = self.value_owner.get()
 
-        self.db.update_book(self.id, title, author, publisher, category, publish, owner)
+        self.db.update_book(self.id, title, author, publisher, category, publish, self.name_dict[owner])
+        self.refresh_fn()
 
 class ShowFrame(tk.Frame):
     def __init__(self, db):
@@ -295,7 +297,7 @@ class ShowFrame(tk.Frame):
         self.refresh()
 
     def create_edit_tab(self, id):
-        self.current_edit_tab = EditFrame(self.db, id)
+        self.current_edit_tab = EditFrame(self.db, id, self.refresh)
 
 class ReportFrame(tk.Frame):
     def __init__(self, db):
@@ -321,9 +323,6 @@ class App(tk.Tk):
         self.add_frame = AddFrame(self.db)
         self.add_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
-        # self.edit_frame = EditFrame(self.db)
-        # self.edit_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-
         self.show_frame = ShowFrame(self.db)
         self.show_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
@@ -331,7 +330,6 @@ class App(tk.Tk):
         self.report_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         
         self.notebook.add(self.add_frame, text="Formularz do wstawiania")
-        # self.notebook.add(self.edit_frame, text="Formularz do edycji")
         self.notebook.add(self.show_frame, text="Formularz przegladania")
         self.notebook.add(self.report_frame, text="Formularz do raportowania")
 
