@@ -3,7 +3,7 @@ import sqlite3
 from tkinter import StringVar, ttk
 from tkinter import messagebox
 import os
-from unicodedata import category
+from datetime import datetime
 
 class DBConnector():
     def __init__(self): 
@@ -116,6 +116,31 @@ class AddFrame(tk.Frame):
         publish = self.publish_date_add_input.get()
         owner = self.value_owner.get()
 
+        if not title.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not author.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not publisher.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not category.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not publish.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not owner.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+
+        try:
+            datetime.strptime(publish, "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror(message="Format daty to YYYY-MM-DD")
+            return
+
         self.db.insert_book(title, author, publisher, category, publish, self.name_dict[owner])
 
 class EditFrame(tk.Toplevel):
@@ -185,6 +210,31 @@ class EditFrame(tk.Toplevel):
         category = self.category_edit_input.get()
         publish = self.publish_date_edit_input.get()
         owner = self.value_owner.get()
+
+        if not title.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not author.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not publisher.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not category.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not publish.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+        if not owner.strip():
+            messagebox.showerror(message="Pole nie może być")
+            return
+
+        try:
+            datetime.strptime(publish, "%Y-%m-%d")
+        except ValueError:
+            messagebox.showerror(message="Format daty to YYYY-MM-DD")
+            return
 
         self.db.update_book(self.id, title, author, publisher, category, publish, self.name_dict[owner])
         self.refresh_fn()
