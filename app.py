@@ -257,57 +257,72 @@ class ShowFrame(tk.Frame):
         self.config(bg="#555555")
         self.db = db
 
-        self.title_label = tk.Label(master=self, text="Tytul", width=20, bg="#555555", fg="#EEEEEE")
+        self.canvas = tk.Canvas(master=self, bg="#555555")
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10);
+        self.scrollbar = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollbar.pack(side="right", fill="y")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.inner_frame = tk.Frame(master=self.canvas, bg="#555555")
+        self.canvas_window = self.canvas.create_window((0,0), window=self.inner_frame, anchor="nw")
+
+        self.inner_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+
+        self.title_label = tk.Label(master=self.inner_frame, text="Tytul", width=20, bg="#555555", fg="#EEEEEE")
         self.title_label.grid(row=0, column=0,  pady=10)
 
-        self.title_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("title", "DESC"))
+        self.title_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("title", "DESC"))
         self.title_button_up.grid(row=0, column=1,  pady=10)
-        self.title_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("title", "ASC"))
+        self.title_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("title", "ASC"))
         self.title_button_down.grid(row=0, column=2,  pady=10)
 
-        self.author_label = tk.Label(master=self, text="Autor", width=20, bg="#555555", fg="#EEEEEE")
+        self.author_label = tk.Label(master=self.inner_frame, text="Autor", width=20, bg="#555555", fg="#EEEEEE")
         self.author_label.grid(row=0, column=3,  pady=10)
         
-        self.author_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("author", "DESC"))
+        self.author_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("author", "DESC"))
         self.author_button_up.grid(row=0, column=4,  pady=10)
-        self.author_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("author", "ASC"))
+        self.author_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("author", "ASC"))
         self.author_button_down.grid(row=0, column=5,  pady=10)
 
-        self.publisher_label = tk.Label(master=self, text="Wydawca", width=20, bg="#555555", fg="#EEEEEE")
+        self.publisher_label = tk.Label(master=self.inner_frame, text="Wydawca", width=20, bg="#555555", fg="#EEEEEE")
         self.publisher_label.grid(row=0, column=6,  pady=10)
 
-        self.publisher_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("publisher", "DESC"))
+        self.publisher_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("publisher", "DESC"))
         self.publisher_button_up.grid(row=0, column=7,  pady=10)
-        self.publisher_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("publisher", "ASC"))
+        self.publisher_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("publisher", "ASC"))
         self.publisher_button_down.grid(row=0, column=8,  pady=10)
 
-        self.category_label = tk.Label(master=self, text="Kategoria", width=20, bg="#555555", fg="#EEEEEE")
+        self.category_label = tk.Label(master=self.inner_frame, text="Kategoria", width=20, bg="#555555", fg="#EEEEEE")
         self.category_label.grid(row=0, column=9,  pady=10)
         
-        self.category_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("category", "DESC"))
+        self.category_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("category", "DESC"))
         self.category_button_up.grid(row=0, column=10,  pady=10)
-        self.category_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("category", "ASC"))
+        self.category_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("category", "ASC"))
         self.category_button_down.grid(row=0, column=11,  pady=10)
 
-        self.publish_date_label = tk.Label(master=self, text="Data Publikacji", width=20, bg="#555555", fg="#EEEEEE")
+        self.publish_date_label = tk.Label(master=self.inner_frame, text="Data Publikacji", width=20, bg="#555555", fg="#EEEEEE")
         self.publish_date_label.grid(row=0, column=12,  pady=10)
 
-        self.publish_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("publish_date", "DESC"))
+        self.publish_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("publish_date", "DESC"))
         self.publish_button_up.grid(row=0, column=13,  pady=10)
-        self.publish_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("publish_date", "ASC"))
+        self.publish_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("publish_date", "ASC"))
         self.publish_button_down.grid(row=0, column=14,  pady=10)
 
-        self.owner_label = tk.Label(master=self, text="Wlasciciel", width=20, bg="#555555", fg="#EEEEEE")
+        self.owner_label = tk.Label(master=self.inner_frame, text="Wlasciciel", width=20, bg="#555555", fg="#EEEEEE")
         self.owner_label.grid(row=0, column=15,  pady=10)
 
-        self.owner_button_up = tk.Button(master=self, text="Up", command=lambda: self.update_dict("owner", "DESC"))
+        self.owner_button_up = tk.Button(master=self.inner_frame, text="DESC", command=lambda: self.update_dict("users.name", "DESC"))
         self.owner_button_up.grid(row=0, column=16,  pady=10)
-        self.owner_button_down = tk.Button(master=self, text="Down", command=lambda: self.update_dict("owner", "ASC"))
+        self.owner_button_down = tk.Button(master=self.inner_frame, text="ASC", command=lambda: self.update_dict("users.name", "ASC"))
         self.owner_button_down.grid(row=0, column=17,  pady=10)
 
-        self.search_bar = tk.Entry(self)
+        self.search_bar = tk.Entry(master=self.inner_frame)
         self.search_bar.grid(row=0, column=18, padx=10, pady=10)
-        self.search_button = tk.Button(self, command=self.refresh)
+        self.search_button = tk.Button(master=self.inner_frame, command=self.refresh)
         self.search_button.grid(row=0, column=19)
 
         self.elements_list = []
@@ -323,19 +338,19 @@ class ShowFrame(tk.Frame):
                 e.after(1, e.destroy)
         
         for elem in book_list:
-            field_title = tk.Label(self, text=elem[1])
+            field_title = tk.Label(self.inner_frame, text=elem[1])
             field_title.grid(row=index, column=0,  pady=10, columnspan=3)
-            field_author = tk.Label(self, text=elem[2])
+            field_author = tk.Label(self.inner_frame, text=elem[2])
             field_author.grid(row=index, column=3,  pady=10, columnspan=3)
-            field_publisher = tk.Label(self, text=elem[3])
+            field_publisher = tk.Label(self.inner_frame, text=elem[3])
             field_publisher.grid(row=index, column=6,  pady=10, columnspan=3)
-            field_category = tk.Label(self, text=elem[4])
+            field_category = tk.Label(self.inner_frame, text=elem[4])
             field_category.grid(row=index, column=9,  pady=10, columnspan=3)
-            field_publish = tk.Label(master=self, text=elem[5])
+            field_publish = tk.Label(master=self.inner_frame, text=elem[5])
             field_publish.grid(row=index, column=12,  pady=10, columnspan=3)
-            field_owner = tk.Label(self, text=elem[7])
+            field_owner = tk.Label(self.inner_frame, text=elem[7])
             field_owner.grid(row=index, column=15,  pady=10, columnspan=3)
-            edit_button = tk.Button(self, text="Edit", command=lambda book_id=elem[0]: self.create_edit_tab(book_id))
+            edit_button = tk.Button(self.inner_frame, text="Edit", command=lambda book_id=elem[0]: self.create_edit_tab(book_id))
             edit_button.grid(row=index, column=17,  pady=10)
             self.elements_list.append((field_title, field_author, field_publisher, field_category, field_publish, field_owner, edit_button))
             index += 1
