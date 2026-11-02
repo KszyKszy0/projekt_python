@@ -62,6 +62,30 @@ class DBConnector():
         messagebox.showinfo(message=f"Pomyślnie usunięto książkę {name}")
         self.con.commit()
 
+    def get_latest_books(self):
+        res = self.cur.execute("SELECT title, creation_date FROM books ORDER BY creation_date DESC LIMIT 5;")
+
+        output = res.fetchall()
+        return output
+
+    def get_users_book(self):
+        res = self.cur.execute("SELECT users.name, COUNT(*) FROM Books JOIN Users ON Books.owner = Users.id GROUP BY Users.id ORDER BY COUNT(*) DESC;")
+
+        output = res.fetchall()
+        return output
+
+    def get_books_per_category(self):
+        res = self.cur.execute("SELECT category, COUNT(*) FROM Books GROUP BY category ORDER BY COUNT(*) DESC;")
+
+        output = res.fetchall()
+        return output
+
+    def get_popular_authors(self):
+        res = self.cur.execute(f"SELECT author, COUNT(*) FROM Books GROUP BY author ORDER BY COUNT(*) DESC LIMIT 5;")
+
+        output = res.fetchall()
+        return output
+
 class AddFrame(tk.Frame):
     def __init__(self, db):
         super().__init__(bg="#202734")
@@ -252,7 +276,7 @@ class EditFrame(tk.Toplevel):
         self.refresh_fn()
 
 class ShowFrame(tk.Frame):
-    def __init__(self, db):
+    def __init__(self, db, rep_frame):
         super().__init__()
 
         self.sort_dict = {
@@ -268,6 +292,7 @@ class ShowFrame(tk.Frame):
 
         self.config(bg="#202734")
         self.db = db
+        self.rep_frame = rep_frame
 
         self.canvas = tk.Canvas(master=self, bg="#202734")
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
@@ -369,6 +394,8 @@ class ShowFrame(tk.Frame):
             self.elements_list.append((field_title, field_author, field_publisher, field_category, field_publish, field_owner, edit_button, delete_button))
             index += 1
 
+        self.rep_frame.refresh_report_data()
+
     def update_dict(self, ind, val):
         for k in self.sort_dict.keys():
             self.sort_dict[k] = "0"
@@ -387,6 +414,93 @@ class ReportFrame(tk.Frame):
         super().__init__()
 
         self.db = db
+        self.report_items = []
+
+        self.main_containter = tk.Frame(self)
+        self.main_containter.pack(expand=True, fill="both")
+
+        self.latest_books = tk.Frame(self.main_containter, bg="#202734", highlightthickness=1)
+        self.latest_books.grid(row=0, column=0, sticky="nsew")
+        self.latest_books_label = tk.Label(self.latest_books, text="Najnowsze książki", bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+        self.latest_books_label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+        self.books_per_person = tk.Frame(self.main_containter, bg="#202734", highlightthickness=1)
+        self.books_per_person.grid(row=0, column=1, sticky="nsew")
+        self.books_per_person_label = tk.Label(self.books_per_person, text="Ilość książek każdej osoby", bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+        self.books_per_person_label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+        self.categories = tk.Frame(self.main_containter, bg="#202734", highlightthickness=1)
+        self.categories.grid(row=1, column=0, sticky="nsew")
+        self.categories_label = tk.Label(self.categories, text="Ilość książek na kategorię", bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+        self.categories_label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+        self.authors = tk.Frame(self.main_containter, bg="#202734", highlightthickness=1)
+        self.authors.grid(row=1, column=1, sticky="nsew")
+        self.authors_label = tk.Label(self.authors, text="Najpopularniejsi autorzy", bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+        self.authors_label.grid(row=0, column=0, columnspan=2, sticky="ew", padx=10, pady=10)
+
+        self.main_containter.grid_rowconfigure(0, weight=1)
+        self.main_containter.grid_rowconfigure(1, weight=1)
+        self.main_containter.grid_columnconfigure(0, weight=1)
+        self.main_containter.grid_columnconfigure(1, weight=1)
+
+        self.latest_books.grid_columnconfigure(0, weight=1)
+
+        self.books_per_person.grid_columnconfigure(0, weight=1)
+        self.books_per_person.grid_columnconfigure(1, weight=1)
+
+        self.categories.grid_columnconfigure(0, weight=1)
+        self.categories.grid_columnconfigure(1, weight=1)
+
+        self.authors.grid_columnconfigure(0, weight=1)
+        self.authors.grid_columnconfigure(1, weight=1)
+
+        self.refresh_report_data()
+
+
+    def refresh_report_data(self):
+        latest_books = self.db.get_latest_books()
+        people_books = self.db.get_users_book()
+        category_books = self.db.get_books_per_category()
+        authors = self.db.get_popular_authors()
+        print(people_books)
+
+        for e in self.report_items:
+            e.destroy()
+
+        for i, elem in enumerate(latest_books):
+            label = tk.Label(self.latest_books, text=elem[0], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label.grid(row=i+1, column=0, sticky="ew", padx=10, pady=10)
+            label_2 = tk.Label(self.latest_books, text=elem[1], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label_2.grid(row=i+1, column=1, sticky="ew", padx=10, pady=10)
+            self.report_items.append(label)
+            self.report_items.append(label_2)
+
+        for j, elem in enumerate(people_books):
+            label = tk.Label(self.books_per_person, text=elem[0], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label.grid(row=j+1, column=0, sticky="ew", padx=10, pady=10)
+            label_2 = tk.Label(self.books_per_person, text=elem[1], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label_2.grid(row=j+1, column=1, sticky="ew", padx=10, pady=10)
+            self.report_items.append(label)
+            self.report_items.append(label_2)
+
+        for k, elem in enumerate(category_books):
+            label = tk.Label(self.categories, text=elem[0], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label.grid(row=k+1, column=0, sticky="ew", padx=10, pady=10)
+            label_2 = tk.Label(self.categories, text=elem[1], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label_2.grid(row=k+1, column=1, sticky="ew", padx=10, pady=10)
+            self.report_items.append(label)
+            self.report_items.append(label_2)
+
+        for l, elem in enumerate(authors):
+            label = tk.Label(self.authors, text=elem[0], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label.grid(row=l+1, column=0, sticky="ew", padx=10, pady=10)
+            label_2 = tk.Label(self.authors, text=elem[1], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            label_2.grid(row=l+1, column=1, sticky="ew", padx=10, pady=10)
+            self.report_items.append(label)
+            self.report_items.append(label_2)
+
+            
 
 class App(tk.Tk):
     def __init__(self):
@@ -404,12 +518,11 @@ class App(tk.Tk):
         self.notebook.pack(expand=True, fill="both")
         
         self.add_frame = AddFrame(self.db)
-        self.add_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-
-        self.show_frame = ShowFrame(self.db)
-        self.show_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-
         self.report_frame = ReportFrame(self.db)
+        self.show_frame = ShowFrame(self.db, self.report_frame)
+
+        self.add_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
+        self.show_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         self.report_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         
         self.notebook.add(self.add_frame, text="Formularz do wstawiania")
