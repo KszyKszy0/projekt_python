@@ -16,7 +16,6 @@ class DBConnector():
 
     def insert_book(self, title, author, publisher, category, publish, owner):
         
-        print((title, author, publisher, category, publish, owner))
         if title != '' and author != '' and publisher != '' and category != '' and publish != '' and owner != '':
             self.cur.execute(f"INSERT INTO BOOKS(title, author, publisher, category, publish_date, owner) values ('{title}', '{author}', '{publisher}', '{category}', '{publish}', '{owner}');")
             self.con.commit()
@@ -47,9 +46,8 @@ class DBConnector():
         return output
     
     def update_book(self, id, title, author, publisher, category, publish_date, owner):
-        print((id, title, author, publisher, category, publish_date, owner))
         self.cur.execute(f"UPDATE BOOKS SET title='{title}', author='{author}', publisher='{publisher}', category='{category}', publish_date='{publish_date}', owner='{owner}' WHERE id={id};")
-        # self.con.commit()
+        self.con.commit()
 
     def get_edit_entry(self, id):
         res = self.cur.execute(f"SELECT title, author, publisher, category, publish_date, users.name FROM Books JOIN Users ON Books.owner = Users.id WHERE Books.id={id};")
@@ -463,7 +461,6 @@ class ReportFrame(tk.Frame):
         people_books = self.db.get_users_book()
         category_books = self.db.get_books_per_category()
         authors = self.db.get_popular_authors()
-        print(people_books)
 
         for e in self.report_items:
             e.destroy()
