@@ -18,6 +18,7 @@ class DBConnector():
         
         if title != '' and author != '' and publisher != '' and category != '' and publish != '' and owner != '':
             self.cur.execute(f"INSERT INTO BOOKS(title, author, publisher, category, publish_date, owner) values ('{title}', '{author}', '{publisher}', '{category}', '{publish}', '{owner}');")
+            messagebox.showinfo(message=f"Poprawnie dodano {title}")
             self.con.commit()
         else:
             messagebox.showerror(message="Nie wprowadzono poprawnych danych")
@@ -85,13 +86,15 @@ class DBConnector():
         return output
 
 class AddFrame(tk.Frame):
-    def __init__(self, db):
+    def __init__(self, db, report_frame, show_frame):
         super().__init__(bg="#202734")
 
         self.db = db
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=2)
 
+        self.report_frame = report_frame
+        self.show_frame = show_frame
 
         (num_list, name_list) = db.get_users()
 
@@ -172,6 +175,8 @@ class AddFrame(tk.Frame):
             return
 
         self.db.insert_book(title, author, publisher, category, publish, self.name_dict[owner])
+        self.show_frame.refresh()
+        self.report_frame.refresh_report_data()
 
 class EditFrame(tk.Toplevel):
     def __init__(self, db, id, refresh_fn):
@@ -519,9 +524,9 @@ class App(tk.Tk):
         self.notebook = ttk.Notebook(master=self)
         self.notebook.pack(expand=True, fill="both")
         
-        self.add_frame = AddFrame(self.db)
         self.report_frame = ReportFrame(self.db)
         self.show_frame = ShowFrame(self.db, self.report_frame)
+        self.add_frame = AddFrame(self.db, self.report_frame, self.show_frame)
 
         self.add_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
         self.show_frame.pack(side="left", fill="both", expand=True, padx=10, pady=10)
