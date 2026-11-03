@@ -105,7 +105,7 @@ class AddFrame(tk.Frame):
 
         self.title_add = tk.Label(master=self, text="Tytuł", width=20, bg="#36415A", fg="#EEEEEE", font=("Arial", 15, "bold"))
         self.title_add.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
-        self.title_add_input = tk.Entry(master=self)
+        self.title_add_input = tk.Entry(master=self, font=("Arial", 15, "bold"))
         self.title_add_input.grid(row=1, column=1, padx=20, pady=10, sticky="ew")
         
         self.author_add = tk.Label(master=self, text="Autor", width=20, bg="#36415A", fg="#EEEEEE", font=("Arial", 15, "bold"))
@@ -294,10 +294,13 @@ class ShowFrame(tk.Frame):
 
         self.canvas = tk.Canvas(master=self, bg="#202734")
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10);
         self.scrollbar = tk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
         self.scrollbar.pack(side="right", fill="y")
         self.canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbarx = tk.Scrollbar(self, orient="horizontal", command=self.canvas.xview)
+        self.scrollbarx.pack(side="bottom", fill="x")
+        self.canvas.configure(xscrollcommand=self.scrollbarx.set)
+        self.canvas.pack(side="left", fill="both", expand=True, padx=10, pady=10)
 
         self.inner_frame = tk.Frame(master=self.canvas, bg="#202734")
         self.canvas_window = self.canvas.create_window((0,0), window=self.inner_frame, anchor="nw")
@@ -371,19 +374,20 @@ class ShowFrame(tk.Frame):
         for item_row in self.elements_list:
             for e in item_row:
                 e.after(1, e.destroy)
+        self.elements_list.clear()
         
         for elem in book_list:
-            field_title = tk.Label(self.inner_frame, text=elem[1], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_title = tk.Label(self.inner_frame, text=elem[1], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_title.grid(row=index, column=0,  pady=10, columnspan=3, sticky="ew")
-            field_author = tk.Label(self.inner_frame, text=elem[2], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_author = tk.Label(self.inner_frame, text=elem[2], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_author.grid(row=index, column=3,  pady=10, columnspan=3, sticky="ew")
-            field_publisher = tk.Label(self.inner_frame, text=elem[3], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_publisher = tk.Label(self.inner_frame, text=elem[3], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_publisher.grid(row=index, column=6,  pady=10, columnspan=3, sticky="ew")
-            field_category = tk.Label(self.inner_frame, text=elem[4], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_category = tk.Label(self.inner_frame, text=elem[4], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_category.grid(row=index, column=9,  pady=10, columnspan=3, sticky="ew")
-            field_publish = tk.Label(master=self.inner_frame, text=elem[5], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_publish = tk.Label(master=self.inner_frame, text=elem[5], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_publish.grid(row=index, column=12,  pady=10, columnspan=3, sticky="ew")
-            field_owner = tk.Label(self.inner_frame, text=elem[7], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
+            field_owner = tk.Label(self.inner_frame, text=elem[7], bg="#36415A", font=("Arial", 10, "bold"), fg="White")
             field_owner.grid(row=index, column=15,  pady=10, columnspan=3, sticky="ew")
             edit_button = tk.Button(self.inner_frame, text="Edytuj", command=lambda book_id=elem[0]: self.create_edit_tab(book_id), bg="#E0F8C7")
             edit_button.grid(row=index, column=18,  pady=10)
@@ -464,6 +468,7 @@ class ReportFrame(tk.Frame):
 
         for e in self.report_items:
             e.destroy()
+        self.report_items.clear()
 
         for i, elem in enumerate(latest_books):
             label = tk.Label(self.latest_books, text=elem[0], bg="#36415A", font=("Arial", 12, "bold"), fg="White")
